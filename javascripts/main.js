@@ -66,8 +66,8 @@ var g = 9.81;
     Player.prototype.moveDown = function(modifier) {
         this.position.y += (this.game.tileSize * modifier);
         this.direction = 'down';
-        if (this.position.y > this.game.tileSize * this.height - this.height) {
-            this.position.y = this.game.tileSize * this.height - this.height;
+        if (this.position.y > this.game.tileSize * this.game.height - this.height) {
+            this.position.y = this.game.tileSize * this.game.height - this.height;
         }
     };
 
@@ -84,8 +84,8 @@ var g = 9.81;
 
         this.position.x += (this.game.tileSize * modifier);
         this.direction = 'right';
-        if (this.position.x > this.game.tileSize * this.width - this.width) {
-            this.position.x = this.game.tileSize * this.width - this.width;
+        if (this.position.x > this.game.tileSize * this.game.width - this.width) {
+            this.position.x = this.game.tileSize * this.game.width - this.width;
         }
     };
 
