@@ -1,9 +1,12 @@
 var g = 9.81;
+var socket = io();
+
 
 (function() {
 
     var Player = function(game, x, y, spriteSet) {
-        this.game = game;
+
+        this.uuid = Math.floor(Math.random()*1000);
         this.width = 32;
         this.height = 48;
         // this.jump = false;
@@ -42,8 +45,17 @@ var g = 9.81;
 
         this.sprites.image = new Image();
         this.sprites.image.src = this.sprites.url;
+        this.game = game;
 
     }
+    Player.prototype.light = function() {
+        return {
+            position : this.position,
+            uuid : this.uuid,
+            direction: this.direction,
+            current_mouvement: this.current_mouvement
+        }
+    };
     Player.prototype.speak = function(text) {
         var self = this;
         if (self.speech) {
@@ -53,6 +65,12 @@ var g = 9.81;
         setTimeout(function() {
             delete self.speech;
         }, 2000);
+    };
+    Player.prototype.update = function(player) {
+        for(var attr in player){
+            this[attr] = player[attr];
+        }
+
     };
 
     Player.prototype.moveUp = function(modifier) {
@@ -135,9 +153,48 @@ var g = 9.81;
             this.totalScore = 0;
             this.player = new Player(this, this.width * this.tileSize / 2, this.height * this.tileSize / 2);
             this.enemies = [];
+            this.players = {};
             this.initCanvas();
             this.initEvents();
             this.start();
+            var self = this;
+
+            socket.emit('newplayer', this.player.light());
+
+            socket.on('players', function(players){
+                for (var i in players) {
+                    if(self.players[i]){
+                        self.players[i].update(players[i]);
+                    } else {
+                        var myPlayer = new Player(self, players[i].position.x, players[i].position.y, 'enemies'+ Math.floor(Math.random()*4))  ;
+                        myPlayer.uuid =  players[i].uuid ;
+                        self.players[i] = myPlayer ;
+                    }
+                }
+            });
+
+            socket.on('newplayer', function(player){
+                if(player.uuid == self.player.uuid || self.players[player.uuid]){
+                    return ;
+                }
+                var myPlayer = new Player(self, player.position.x, player.position.y, 'enemies'+ Math.floor(Math.random()*4))  ;
+                myPlayer.uuid =  player.uuid ;
+                self.players[player.uuid] = myPlayer ;
+            });
+
+            socket.on('deleteplayer', function(player){
+                if(self.players[player.uuid]){
+                    delete self.players[player.uuid];
+                }
+            });
+
+            socket.on('playerupdate', function(player){
+                if(!self.players[player.uuid]){
+                    return ;
+                }
+                self.players[player.uuid].update(player);
+            });
+
         }
 
         Canvex.prototype.initCanvas = function() {
@@ -171,38 +228,55 @@ var g = 9.81;
         Canvex.prototype.start = function() {}
 
         Canvex.prototype.update = function(modifier) {
+            var sendUpdate = false ;
             if (38 /*up*/ in canvex.keys) {
                 this.player.moveUp(modifier);
+                sendUpdate = true ;
             }
             if (40 /*down*/ in canvex.keys) {
                 this.player.moveDown(modifier);
+                sendUpdate = true ;
             }
             if (37 /*left*/ in canvex.keys) {
                 this.player.moveLeft(modifier);
+                sendUpdate = true ;
             }
             if (39 /*right*/ in canvex.keys) {
                 this.player.moveRight(modifier);
+                sendUpdate = true ;
             }
             if (32 /*space*/ in canvex.keys) {
                 this.player.jump();
+                sendUpdate = true ;
             }
             if (83 /*'s'*/ in canvex.keys) {
                 this.player.speak("LOL ca va ?");
             }
 
             var now = Date.now();
-            this.lastEnemyDropped = this.lastEnemyDropped || now;
-            if ((this.lastEnemyDropped - now) < -1500) {
-                this.lastEnemyDropped = now;
-                var enemy = new Player(this, Math.random() * this.tileSize * this.width, -30, 'enemies'+ Math.floor(Math.random()*4));
-                this.enemies.push(enemy);
+
+            if(sendUpdate){
+                socket.emit('playerupdate', this.player.light());
+
+                this.lastSentMove = this.lastSentMove || now;
+                if ((this.lastSentMove - now) < -500) {
+                    this.lastSentMove = now;
+                }
             }
-            this.lastMove = this.lastMove || now;
-            if ((this.lastMove - now) < -5) {
-                this.lastMove = now;
-                this.moveEnemies();
-            }
-            this.detectCollision();
+
+            // var now = Date.now();
+            // this.lastEnemyDropped = this.lastEnemyDropped || now;
+            // if ((this.lastEnemyDropped - now) < -1500) {
+            //     this.lastEnemyDropped = now;
+            //     var enemy = new Player(this, Math.random() * this.tileSize * this.width, -30, 'enemies'+ Math.floor(Math.random()*4));
+            //     this.enemies.push(enemy);
+            // }
+            // this.lastMove = this.lastMove || now;
+            // if ((this.lastMove - now) < -5) {
+            //     this.lastMove = now;
+            //     this.moveEnemies();
+            // }
+            // this.detectCollision();
         }
 
         Canvex.prototype.drawScore = function() {
@@ -262,6 +336,7 @@ var g = 9.81;
             this.canvas.width = this.canvas.width;
             this.drawBackground();
             this.drawPlayer();
+            this.drawPlayers();
             // this.drawSpeech();
             this.drawEnemies();
             this.drawScore();
@@ -308,6 +383,21 @@ var g = 9.81;
             this.context.drawImage(this.enemies[i].sprites.image, (this.enemies[i].width + 4) * column, 6 + (this.enemies[i].height * row), 32, 48,
                 this.enemies[i].position.x, this.enemies[i].position.y,
                 this.enemies[i].width, this.enemies[i].height);
+        }
+    }
+
+    Canvex.prototype.drawPlayers = function() {
+        this.context.fillStyle = "red";
+        for (var i in this.players) {
+
+        var player =  this.players[i];
+        var current = (Math.floor(player.current_mouvement++/10) % 3);
+            var row = player.sprites[player.direction][current][0];
+            var column = player.sprites[player.direction][current][1];
+
+            this.context.drawImage(player.sprites.image, (player.width + 4) * column, 6 + (player.height * row), 32, 48,
+                player.position.x, player.position.y,
+                player.width, player.height);
         }
     }
 
