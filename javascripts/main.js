@@ -194,7 +194,7 @@ var g = 9.81;
             this.lastEnemyDropped = this.lastEnemyDropped || now;
             if ((this.lastEnemyDropped - now) < -1500) {
                 this.lastEnemyDropped = now;
-                var enemy = new Player(this, Math.random() * this.tileSize * this.width, -30, 'enemies');
+                var enemy = new Player(this, Math.random() * this.tileSize * this.width, -30, 'enemies'+ Math.floor(Math.random()*4));
                 this.enemies.push(enemy);
             }
             this.lastMove = this.lastMove || now;
@@ -308,19 +308,16 @@ var g = 9.81;
             this.context.drawImage(this.enemies[i].sprites.image, (this.enemies[i].width + 4) * column, 6 + (this.enemies[i].height * row), 32, 48,
                 this.enemies[i].position.x, this.enemies[i].position.y,
                 this.enemies[i].width, this.enemies[i].height);
-
-            // this.context.fillRect(this.enemies[i].position.x, this.enemies[i].position.y, this.enemies[i].size, this.enemies[i].size);
         }
     }
 
     Canvex.prototype.moveEnemies = function(modifier) {
         for (var i = 0; i < this.enemies.length; i++) {
-            // this.enemies[i].position.x += ((2 * Math.random()) - 1);
             this.enemies[i].position.y += 1;
-
             if (this.enemies[i].position.y > this.height * this.tileSize) {
                 delete this.enemies[i];
                 this.enemies.splice(i, 1);
+                this.totalScore--;
             }
         }
     }
