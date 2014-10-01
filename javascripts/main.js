@@ -107,6 +107,10 @@ var socket = io();
         }
     };
 
+    Player.prototype.idle = function(modifier) {
+        this.current_mouvement = 1 ;
+    };
+
     Player.prototype.jump = function() {
         if (this.isJumping) {
             return;
@@ -249,19 +253,23 @@ var socket = io();
                 this.player.jump();
                 sendUpdate = true ;
             }
-            if (83 /*'s'*/ in canvex.keys) {
-                this.player.speak("LOL ca va ?");
+
+            if(!Object.keys(canvex.keys).length){
+                this.player.idle();
+            } else {
+                this.current_mouvement++;
             }
+
+            // if (83 /*'s'*/ in canvex.keys) {
+            //     this.player.speak("LOL ca va ?");
+            // }
 
             var now = Date.now();
 
-            if(sendUpdate){
+            this.lastSentMove = this.lastSentMove || now;
+            if ((this.lastSentMove - now) < -20) {
                 socket.emit('playerupdate', this.player.light());
-
-                this.lastSentMove = this.lastSentMove || now;
-                if ((this.lastSentMove - now) < -500) {
-                    this.lastSentMove = now;
-                }
+                this.lastSentMove = now;
             }
 
             // var now = Date.now();
@@ -376,7 +384,7 @@ var socket = io();
         this.context.fillStyle = "red";
         for (var i = 0; i < this.enemies.length; i++) {
 
-        var current = (Math.floor(this.enemies[i].current_mouvement++/10) % 3);
+        var current = Math.floor(this.enemies[i].current_mouvement/10) % 3;
             var row = this.enemies[i].sprites[this.enemies[i].direction][current][0];
             var column = this.enemies[i].sprites[this.enemies[i].direction][current][1];
 
@@ -391,7 +399,7 @@ var socket = io();
         for (var i in this.players) {
 
         var player =  this.players[i];
-        var current = (Math.floor(player.current_mouvement++/10) % 3);
+        var current = Math.floor(player.current_mouvement/10) % 3;
             var row = player.sprites[player.direction][current][0];
             var column = player.sprites[player.direction][current][1];
 
