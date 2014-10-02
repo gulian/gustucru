@@ -9,14 +9,19 @@ app.use(express.static(__dirname));
 var players = {};
 
 io.on('connection', function(socket) {
-
+    var socketplayer ;
     socket.emit('players', players);
 
-    socket.on('disconnect', function(player) {
-        io.emit('deleteplayer', player);
+    socket.on('disconnect', function() {
+        if(!socketplayer){
+            return ;
+        }
+        delete players[socketplayer.uuid];
+        io.emit('deleteplayer', socketplayer);
     });
 
     socket.on('newplayer', function(player) {
+        socketplayer = player ;
         players[player.uuid] = player;
         io.emit('newplayer', player);
     });

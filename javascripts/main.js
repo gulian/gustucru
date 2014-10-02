@@ -18,8 +18,8 @@ var socket = io();
         this.sprites = [];
         this.direction = 'down';
         this.current_mouvement = 0;
+        this.spriteSet = spriteSet || 'javascripts/images/player.png';
         this.sprites = {
-            'url': spriteSet ?  'javascripts/images/'+spriteSet+'.png' : 'javascripts/images/player.png',
             'up': [
                 [0, 0],
                 [0, 1],
@@ -44,7 +44,7 @@ var socket = io();
         }
 
         this.sprites.image = new Image();
-        this.sprites.image.src = this.sprites.url;
+        this.sprites.image.src = this.spriteSet;
         this.game = game;
 
     }
@@ -53,6 +53,7 @@ var socket = io();
             position : this.position,
             uuid : this.uuid,
             direction: this.direction,
+            spriteSet: this.spriteSet,
             current_mouvement: this.current_mouvement
         }
     };
@@ -150,12 +151,12 @@ var socket = io();
 
         var Canvex = function() {
             this.tileSize = 32;
-            this.width = 10;
-            this.height = 10;
+            this.width = 15;
+            this.height = 15;
             this.difficulty = 1;
             this.keys = {};
             this.totalScore = 0;
-            this.player = new Player(this, this.width * this.tileSize / 2, this.height * this.tileSize / 2);
+            this.player = new Player(this, this.width * this.tileSize / 2, this.height * this.tileSize / 2, 'javascripts/images/enemies'+ Math.floor(Math.random()*4)+".png");
             this.enemies = [];
             this.players = {};
             this.initCanvas();
@@ -170,7 +171,7 @@ var socket = io();
                     if(self.players[i]){
                         self.players[i].update(players[i]);
                     } else {
-                        var myPlayer = new Player(self, players[i].position.x, players[i].position.y, 'enemies'+ Math.floor(Math.random()*4))  ;
+                        var myPlayer = new Player(self, players[i].position.x, players[i].position.y,  players[i].spriteSet)  ;
                         myPlayer.uuid =  players[i].uuid ;
                         self.players[i] = myPlayer ;
                     }
@@ -181,7 +182,7 @@ var socket = io();
                 if(player.uuid == self.player.uuid || self.players[player.uuid]){
                     return ;
                 }
-                var myPlayer = new Player(self, player.position.x, player.position.y, 'enemies'+ Math.floor(Math.random()*4))  ;
+                var myPlayer = new Player(self, player.position.x, player.position.y,  player.spriteSet)  ;
                 myPlayer.uuid =  player.uuid ;
                 self.players[player.uuid] = myPlayer ;
             });
@@ -193,10 +194,9 @@ var socket = io();
             });
 
             socket.on('playerupdate', function(player){
-                if(!self.players[player.uuid]){
-                    return ;
+                if(self.players[player.uuid]){
+                    self.players[player.uuid].update(player);
                 }
-                self.players[player.uuid].update(player);
             });
 
         }
@@ -346,8 +346,8 @@ var socket = io();
             this.drawPlayer();
             this.drawPlayers();
             // this.drawSpeech();
-            this.drawEnemies();
-            this.drawScore();
+            // this.drawEnemies();
+            // this.drawScore();
 
         };
 
@@ -423,15 +423,18 @@ var socket = io();
     Canvex.prototype.drawBackground = function() {
         var dx = 0,
             dy = 0;
+
+        this.context.fillStyle = "#DDDDDD";
+
         this.context.save();
-        this.context.translate(this.width * this.tileSize /
-            2, this.height * this.tileSize / 16);
+        this.context.translate(this.width * this.tileSize /2, this.height * this.tileSize / 16);
+        this.context.translate(0, -10*this.height );
+
         this.context.scale(1, 0.5);
         this.context.rotate(45 * Math.PI / 180);
-        for (var i = 0; i < this.width; i++) {
-            for (var x = 0; x < this.height; x++) {
+        for (var i = -2*this.width ; i < this.width; i++) {
+            for (var x = -2*this.height; x < this.height; x++) {
                 this.context.strokeRect(dx, dy, this.tileSize, this.tileSize);
-                this.context.fillStyle = "#DDDDDD";
                 this.context.fillRect(dx, dy, this.tileSize, this.tileSize);
                 dx += this.tileSize;
             }
