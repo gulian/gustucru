@@ -18,7 +18,7 @@ var socket = io();
         this.sprites = [];
         this.direction = 'down';
         this.current_mouvement = 0;
-        this.spriteSet = spriteSet || 'javascripts/images/player.png';
+        this.spriteSet = spriteSet || 'javascripts/images/enemies4.png';
         this.sprites = {
             'up': [
                 [0, 0],
@@ -248,7 +248,6 @@ var socket = io();
             if (!gustucru.players[player.uuid]) {
                 return;
             }
-                console.log(player.moves);
             for (var i = 0; i < player.moves.length; i++) {
                 gustucru.players[player.uuid]["move" + player.moves[i]]();
 
