@@ -76,11 +76,11 @@ var socket = io();
 
     Player.prototype.HZ60 = 16;
 
-    Player.prototype.moveup = function(modifier) {
-        if (this.isMovingUp) {
+    Player.prototype.moveup = function() {
+        if (this.isMoving) {
             return false;
         } else {
-            this.isMovingUp = true;
+            this.isMoving = true;
         }
         var before = this.position.y,
             self = this,
@@ -94,18 +94,18 @@ var socket = io();
                     self.position.y = 0;
                 }
                 if (t > 4) {
-                    self.isMovingUp = false;
+                    self.isMoving = false;
                     clearInterval(handle);
                 }
             }, this.HZ60);
         return true;
     };
 
-    Player.prototype.movedown = function(modifier) {
-        if (this.isMovingDown) {
+    Player.prototype.movedown = function() {
+        if (this.isMoving) {
             return false;
         } else {
-            this.isMovingDown = true;
+            this.isMoving = true;
         }
         var before = this.position.y;
         var self = this;
@@ -119,18 +119,18 @@ var socket = io();
                     self.position.y = self.game.height - self.height;
                 }
                 if (t > 4) {
-                    self.isMovingDown = false;
+                    self.isMoving = false;
                     clearInterval(handle);
                 }
             }, this.HZ60);
         return true;
     };
 
-    Player.prototype.moveleft = function(modifier) {
-        if (this.isMovingLeft) {
+    Player.prototype.moveleft = function() {
+        if (this.isMoving) {
             return false;
         } else {
-            this.isMovingLeft = true;
+            this.isMoving = true;
         }
         var before = this.position.x;
         var self = this;
@@ -144,7 +144,7 @@ var socket = io();
                     self.position.x = 0;
                 }
                 if (t > 4) {
-                    self.isMovingLeft = false;
+                    self.isMoving = false;
                     clearInterval(handle);
                 }
             }, this.HZ60);
@@ -152,11 +152,11 @@ var socket = io();
 
     };
 
-    Player.prototype.moveright = function(modifier) {
-        if (this.isMovingRight) {
+    Player.prototype.moveright = function() {
+        if (this.isMoving) {
             return false;
         } else {
-            this.isMovingRight = true;
+            this.isMoving = true;
         }
         var before = this.position.x;
         var self = this;
@@ -170,7 +170,7 @@ var socket = io();
                     self.position.x = self.game.width - self.width;
                 }
                 if (t > 4) {
-                    self.isMovingRight = false;
+                    self.isMoving = false;
                     clearInterval(handle);
                 }
             }, this.HZ60);
@@ -287,25 +287,25 @@ var socket = io();
         }, false);
     }
 
-    Gustucru.prototype.update = function(modifier) {
+    Gustucru.prototype.update = function() {
         var moves = [];
         if (38 /*up*/ in gustucru.keys) {
-            if (this.player.moveup(modifier)) {
+            if (this.player.moveup()) {
                 moves.push('up');
             }
         }
         if (40 /*down*/ in gustucru.keys) {
-            if (this.player.movedown(modifier)) {
+            if (this.player.movedown()) {
                 moves.push('down');
             }
         }
         if (37 /*left*/ in gustucru.keys) {
-            if (this.player.moveleft(modifier)) {
+            if (this.player.moveleft()) {
                 moves.push('left');
             }
         }
         if (39 /*right*/ in gustucru.keys) {
-            if (this.player.moveright(modifier)) {
+            if (this.player.moveright()) {
                 moves.push('right');
             }
         }
