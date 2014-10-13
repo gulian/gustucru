@@ -55,7 +55,7 @@ var socket = io();
             uuid: this.uuid,
             direction: this.direction,
             spriteSet: this.spriteSet,
-            current_mouvement: this.current_mouvement
+            // current_mouvement: this.current_mouvement
         }
     };
 
@@ -88,6 +88,7 @@ var socket = io();
             handle = setInterval(function() {
                 t++;
                 self.direction = 'up';
+                self.current_mouvement++;
                 self.position.y -= self.speed;
                 if (self.position.y < 0) {
                     self.position.y = 0;
@@ -112,9 +113,10 @@ var socket = io();
             handle = setInterval(function() {
                 t++;
                 self.direction = 'down';
+                self.current_mouvement++;
                 self.position.y += self.speed;
-                if (self.position.y > self.game.tileSize * self.game.height - self.height) {
-                    self.position.y = self.game.tileSize * self.game.height - self.height;
+                if (self.position.y > self.game.height - self.height) {
+                    self.position.y = self.game.height - self.height;
                 }
                 if (t > 4) {
                     self.isMovingDown = false;
@@ -136,6 +138,7 @@ var socket = io();
             handle = setInterval(function() {
                 t++;
                 self.direction = 'left';
+                self.current_mouvement++;
                 self.position.x -= self.speed;
                 if (self.position.x < 0) {
                     self.position.x = 0;
@@ -161,9 +164,10 @@ var socket = io();
             handle = setInterval(function() {
                 t++;
                 self.direction = 'right';
+                self.current_mouvement++;
                 self.position.x += self.speed;
-                if (self.position.x > self.game.tileSize * self.game.width - self.width) {
-                    self.position.x = self.game.tileSize * self.game.width - self.width;
+                if (self.position.x > self.game.width - self.width) {
+                    self.position.x = self.game.width - self.width;
                 }
                 if (t > 4) {
                     self.isMovingRight = false;
@@ -172,10 +176,6 @@ var socket = io();
             }, this.HZ60);
         return true;
 
-    };
-
-    Player.prototype.idle = function(modifier) {
-        this.current_mouvement = 1;
     };
 
     Player.prototype.movejump = function() {
@@ -188,7 +188,7 @@ var socket = io();
         var t = 0,
             handle = setInterval(function() {
                 t++;
-                self.position.y = self.yBeforeJump - (((150) * t - (g / 2) * t * t)) / self.game.tileSize;
+                self.position.y = self.yBeforeJump - (((150) * t - (g / 2) * t * t)) / 32;
                 if (self.position.y >= self.yBeforeJump) {
                     self.position.y = self.yBeforeJump;
                     self.isJumping = false;
@@ -204,12 +204,11 @@ var socket = io();
 (function() {
 
     var Gustucru = function() {
-        this.tileSize = 32;
-        this.width = 15;
-        this.height = 15;
+        this.width = 440;
+        this.height = 440;
         this.keys = {};
-        this.totalScore = 0;
-        this.player = new Player(this, this.width * this.tileSize / 2, this.height * this.tileSize / 2, 'javascripts/images/enemies' + Math.floor(Math.random() * 5) + ".png");
+        this.totalScore = 0; 
+        this.player = new Player(this, this.width  / 2, this.height  / 2, 'javascripts/images/enemies' + Math.floor(Math.random() * 5) + ".png");
         this.enemies = [];
         this.players = {};
 
@@ -261,8 +260,8 @@ var socket = io();
     Gustucru.prototype.initCanvas = function() {
         this.canvas = document.createElement("canvas");
         this.context = this.canvas.getContext("2d");
-        this.canvas.width = this.width * this.tileSize;
-        this.canvas.height = this.height * this.tileSize;
+        this.canvas.width = this.width ;
+        this.canvas.height = this.height ;
         document.body.appendChild(this.canvas);
 
         this.background = new Image();
@@ -323,7 +322,7 @@ var socket = io();
     Gustucru.prototype.drawScore = function() {
         this.context.font = '20px "silkscreennormal"';
         this.context.fillStyle = "black";
-        this.context.fillText("Score : " + this.totalScore, 10, this.height * this.tileSize - 10);
+        this.context.fillText("Score : " + this.totalScore, 10, this.height  - 10);
     }
 
     Gustucru.prototype.render = function() {
@@ -341,7 +340,6 @@ var socket = io();
         this.context.drawImage(this.player.sprites.image, (this.player.width + 4) * column, 6 + (this.player.height * row), 32, 48,
             this.player.position.x, this.player.position.y,
             this.player.width, this.player.height);
-
     }
 
     Gustucru.prototype.drawPlayers = function() {
