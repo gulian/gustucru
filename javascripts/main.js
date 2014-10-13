@@ -3,12 +3,12 @@ var socket = io();
 
 (function() {
 
-    var Player = function(game, x, y, spriteSet) {
+    var Player = function(game, x, y, spriteSet, name) {
 
         this.uuid = Math.floor(Math.random() * 1000);
         this.width = 32;
         this.height = 48;
-        // this.jump = false;
+        this.name = name;
         this.position = {
             x: (x - this.width / 2) || 0,
             y: (y - this.height / 2) || 0
@@ -203,13 +203,13 @@ var socket = io();
 
 (function() {
 
-    var Gustucru = function() {
+    var Gustucru = function(playersname) {
         this.tileSize = 32;
         this.width = 15;
         this.height = 15;
         this.keys = {};
         this.totalScore = 0;
-        this.player = new Player(this, this.width * this.tileSize / 2, this.height * this.tileSize / 2, 'javascripts/images/enemies' + Math.floor(Math.random() * 5) + ".png");
+        this.player = new Player(this, this.width * this.tileSize / 2, this.height * this.tileSize / 2, 'javascripts/images/enemies' + Math.floor(Math.random() * 5) + ".png", playersname);
         this.enemies = [];
         this.players = {};
 
@@ -222,7 +222,7 @@ var socket = io();
                 if (gustucru.players[i]) {
                     gustucru.players[i].update(players[i]);
                 } else {
-                    var myPlayer = new Player(gustucru, players[i].position.x, players[i].position.y, players[i].spriteSet);
+                    var myPlayer = new Player(gustucru, players[i].position.x, players[i].position.y, players[i].spriteSet, players[i].name);
                     myPlayer.uuid = players[i].uuid;
                     gustucru.players[i] = myPlayer;
                 }
@@ -233,7 +233,7 @@ var socket = io();
             if (player.uuid == gustucru.player.uuid || gustucru.players[player.uuid]) {
                 return;
             }
-            var myPlayer = new Player(gustucru, player.position.x, player.position.y, player.spriteSet);
+            var myPlayer = new Player(gustucru, player.position.x, player.position.y, player.spriteSet, player.name);
             myPlayer.uuid = player.uuid;
             gustucru.players[player.uuid] = myPlayer;
         });
@@ -355,11 +355,19 @@ var socket = io();
             this.context.drawImage(player.sprites.image, (player.width + 4) * column, 6 + (player.height * row), 32, 48,
                 player.position.x, player.position.y,
                 player.width, player.height);
+            this.drawName(player);
         }
     }
 
     Gustucru.prototype.drawBackground = function() {
         this.context.drawImage(this.background, -25, -70);
+    }
+
+    Gustucru.prototype.drawName = function(player) {
+        console.log(player);
+        this.context.font = '20px "silkscreennormal"';
+        this.context.fillStyle = "black";
+        this.context.fillText(player.name, player.position.x, player.position.y);
     }
 
     Gustucru.prototype.main = function() {
@@ -368,7 +376,6 @@ var socket = io();
         window.requestAnimationFrame(gustucru.main, this.canvas);
     };
 
-    window.gustucru = new Gustucru();
-    window.gustucru.main();
+    window.Gustucru = Gustucru;
 
 })();

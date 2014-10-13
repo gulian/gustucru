@@ -5,6 +5,21 @@
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
+    <input type="text" id="playersname" placeholder="Enter name"></input>
+    <button onclick='launch();'>PLAY</button>
     <script type="text/javascript" src="javascripts/main.js"></script>
+
+    <script>
+        function launch () {
+            var playersname = document.getElementById('playersname');
+            if(playersname.value.trim().length){
+                window.gustucru = new Gustucru(playersname);
+                window.gustucru.main();
+            } else {
+                alert('Enter valid name');
+            }
+        }
+    </script>
+
 </body>
 </html>
