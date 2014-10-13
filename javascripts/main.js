@@ -10,8 +10,8 @@ var socket = io();
         this.height = 48;
         // this.jump = false;
         this.position = {
-            x: (x - this.width / 2) || 0,
-            y: (y - this.height / 2) || 0
+            x: x || 0,
+            y: y || 0
         };
         this.size = 10;
         this.speed = 7;
