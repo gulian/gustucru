@@ -74,7 +74,7 @@ var socket = io();
 
     };
 
-    Player.prototype.HZ60 = 16;
+    Player.prototype.freshRate = 20;
 
     Player.prototype.moveup = function() {
         if (this.isMoving) {
@@ -82,22 +82,21 @@ var socket = io();
         } else {
             this.isMoving = true;
         }
-        var before = this.position.y,
-            self = this,
+            player = this,
             t = 0,
             handle = setInterval(function() {
                 t++;
-                self.direction = 'up';
-                self.current_mouvement++;
-                self.position.y -= self.speed;
-                if (self.position.y < 0) {
-                    self.position.y = 0;
+                player.direction = 'up';
+                player.current_mouvement++;
+                player.position.y -= player.speed;
+                if (player.position.y < 0) {
+                    player.position.y = 0;
                 }
-                if (t > 4) {
-                    self.isMoving = false;
+                if (t > 5) {
+                    player.isMoving = false;
                     clearInterval(handle);
                 }
-            }, this.HZ60);
+            }, this.freshRate);
         return true;
     };
 
@@ -107,22 +106,21 @@ var socket = io();
         } else {
             this.isMoving = true;
         }
-        var before = this.position.y;
-        var self = this;
+        var player = this;
         var t = 0,
             handle = setInterval(function() {
                 t++;
-                self.direction = 'down';
-                self.current_mouvement++;
-                self.position.y += self.speed;
-                if (self.position.y > self.game.height - self.height) {
-                    self.position.y = self.game.height - self.height;
+                player.direction = 'down';
+                player.current_mouvement++;
+                player.position.y += player.speed;
+                if (player.position.y > player.game.height - player.height) {
+                    player.position.y = player.game.height - player.height;
                 }
-                if (t > 4) {
-                    self.isMoving = false;
+                if (t > 5) {
+                    player.isMoving = false;
                     clearInterval(handle);
                 }
-            }, this.HZ60);
+            }, this.freshRate);
         return true;
     };
 
@@ -132,22 +130,21 @@ var socket = io();
         } else {
             this.isMoving = true;
         }
-        var before = this.position.x;
-        var self = this;
+        var player = this;
         var t = 0,
             handle = setInterval(function() {
                 t++;
-                self.direction = 'left';
-                self.current_mouvement++;
-                self.position.x -= self.speed;
-                if (self.position.x < 0) {
-                    self.position.x = 0;
+                player.direction = 'left';
+                player.current_mouvement++;
+                player.position.x -= player.speed;
+                if (player.position.x < 0) {
+                    player.position.x = 0;
                 }
-                if (t > 4) {
-                    self.isMoving = false;
+                if (t > 5) {
+                    player.isMoving = false;
                     clearInterval(handle);
                 }
-            }, this.HZ60);
+            }, this.freshRate);
         return true;
 
     };
@@ -158,22 +155,21 @@ var socket = io();
         } else {
             this.isMoving = true;
         }
-        var before = this.position.x;
-        var self = this;
+        var player = this;
         var t = 0,
             handle = setInterval(function() {
                 t++;
-                self.direction = 'right';
-                self.current_mouvement++;
-                self.position.x += self.speed;
-                if (self.position.x > self.game.width - self.width) {
-                    self.position.x = self.game.width - self.width;
+                player.direction = 'right';
+                player.current_mouvement++;
+                player.position.x += player.speed;
+                if (player.position.x > player.game.width - player.width) {
+                    player.position.x = player.game.width - player.width;
                 }
-                if (t > 4) {
-                    self.isMoving = false;
+                if (t > 5) {
+                    player.isMoving = false;
                     clearInterval(handle);
                 }
-            }, this.HZ60);
+            }, this.freshRate);
         return true;
 
     };
@@ -182,16 +178,16 @@ var socket = io();
         if (this.isJumping) {
             return false ;
         }
-        var self = this;
-        self.isJumping = true;
-        self.yBeforeJump = this.position.y;
+        var player = this;
+        player.isJumping = true;
+        player.yBeforeJump = this.position.y;
         var t = 0,
             handle = setInterval(function() {
                 t++;
-                self.position.y = self.yBeforeJump - (((150) * t - (g / 2) * t * t)) / 32;
-                if (self.position.y >= self.yBeforeJump) {
-                    self.position.y = self.yBeforeJump;
-                    self.isJumping = false;
+                player.position.y = player.yBeforeJump - (((150) * t - (g / 2) * t * t)) / 32;
+                if (player.position.y >= player.yBeforeJump) {
+                    player.position.y = player.yBeforeJump;
+                    player.isJumping = false;
                     clearInterval(handle);
                 }
             }, 12);
@@ -333,7 +329,7 @@ var socket = io();
     };
 
     Gustucru.prototype.drawPlayer = function() {
-        var current = (37 in gustucru.keys || 38 in gustucru.keys || 39 in gustucru.keys || 40 in gustucru.keys ? Math.floor(this.player.current_mouvement++/10)%3 : 1) ;
+        var current = (37 in gustucru.keys || 38 in gustucru.keys || 39 in gustucru.keys || 40 in gustucru.keys ? Math.floor(this.player.current_mouvement/5)%3 : 1) ;
         var row = this.player.sprites[this.player.direction][current][0];
         var column = this.player.sprites[this.player.direction][current][1];
 
@@ -345,8 +341,7 @@ var socket = io();
     Gustucru.prototype.drawPlayers = function() {
         for (var i in this.players) {
             var player = this.players[i];
-            var current = Math.floor(player.current_mouvement /
-                10) % 3;
+            var current = Math.floor(player.current_mouvement/5) % 3;
             var row = player.sprites[player.direction][current][0];
             var column = player.sprites[player.direction][current][1];
 
