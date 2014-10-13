@@ -74,7 +74,7 @@ var socket = io();
 
     };
 
-    Player.prototype.freshRate = 20;
+    Player.prototype.freshRate = 16;
 
     Player.prototype.moveup = function() {
         if (this.isMoving) {
@@ -92,7 +92,7 @@ var socket = io();
                 if (player.position.y < 0) {
                     player.position.y = 0;
                 }
-                if (t > 5) {
+                if (t > 4) {
                     player.isMoving = false;
                     clearInterval(handle);
                 }
@@ -116,7 +116,7 @@ var socket = io();
                 if (player.position.y > player.game.height - player.height) {
                     player.position.y = player.game.height - player.height;
                 }
-                if (t > 5) {
+                if (t > 4) {
                     player.isMoving = false;
                     clearInterval(handle);
                 }
@@ -140,7 +140,7 @@ var socket = io();
                 if (player.position.x < 0) {
                     player.position.x = 0;
                 }
-                if (t > 5) {
+                if (t > 4) {
                     player.isMoving = false;
                     clearInterval(handle);
                 }
@@ -165,7 +165,7 @@ var socket = io();
                 if (player.position.x > player.game.width - player.width) {
                     player.position.x = player.game.width - player.width;
                 }
-                if (t > 5) {
+                if (t > 4) {
                     player.isMoving = false;
                     clearInterval(handle);
                 }
